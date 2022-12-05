@@ -1,9 +1,5 @@
 # OpenShift Console Plugin Template
 
-This project is a minimal template for writing a new OpenShift Console dynamic
-plugin. It requires OpenShift 4.11. For an example of a plugin that works with
-OpenShift 4.10, see the `release-4.10` branch.
-
 [Dynamic plugins](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk)
 allow you to extend the
 [OpenShift UI](https://github.com/openshift/console)
@@ -16,34 +12,6 @@ and enabled in the console operator config by a cluster administrator.
 to build and run the example. To run OpenShift console in a container, either
 [Docker](https://www.docker.com) or [podman 3.2.0+](https://podman.io) and
 [oc](https://console.redhat.com/openshift/downloads) are required.
-
-## Getting started
-
-After cloning this repo, you should update the plugin metadata such as the
-plugin name in the `consolePlugin` declaration of [package.json](package.json).
-
-```json
-"consolePlugin": {
-  "name": "my-plugin",
-  "version": "0.0.1",
-  "displayName": "My Plugin",
-  "description": "Enjoy this shiny, new console plugin!",
-  "exposedModules": {
-    "ExamplePage": "./components/ExamplePage"
-  },
-  "dependencies": {
-    "@console/pluginAPI": "*"
-  }
-}
-```
-
-The template adds a single example page in the Home navigation section. The
-extension is declared in the [console-extensions.json](console-extensions.json)
-file and the React component is declared in
-[src/components/ExamplePage.tsx](src/components/ExamplePage.tsx).
-
-You can run the plugin using a local development environment or build an image
-to deploy it to a cluster.
 
 ## Development
 

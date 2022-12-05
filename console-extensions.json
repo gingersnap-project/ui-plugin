@@ -3,18 +3,35 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/example",
-      "component": { "$codeRef": "ExamplePage" }
+      "path": "/gingersnap",
+      "component": { "$codeRef": "GingersnapPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": "/create-resource",
+      "component": { "$codeRef": "CreateResource" }
+    }
+  },
+  {
+    "type": "console.navigation/section",
+    "properties": {
+      "id": "gingersnap",
+      "perspective": "admin",
+      "name": "Gingersnap",
+      "dataAttributes": { "data-quickstart-id": "qs-nav-home" }
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "example",
-      "name": "Plugin Example",
-      "href": "/example",
+      "id": "gingersnap",
+      "name": "Gingersnap",
+      "href": "/gingersnap",
       "perspective": "admin",
-      "section": "home"
+      "section": "gingersnap"
     }
   }
 ]

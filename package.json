@@ -49,12 +49,13 @@
     "webpack-dev-server": "^4.7.4"
   },
   "consolePlugin": {
-    "name": "console-plugin-template",
+    "name": "ui-plugin",
     "version": "0.0.1",
-    "displayName": "OpenShift Console Plugin Template",
-    "description": "Template project for OpenShift console plugins. Edit package.json to change this message and the plugin name.",
+    "displayName": "Gingersnap Demo",
+    "description": "Openshift UI plugin for Gingersnap",
     "exposedModules": {
-      "ExamplePage": "./components/ExamplePage"
+      "GingersnapPage": "./components/GingersnapPage",
+      "CreateResource": "./components/k8sResource/Create/CreateResource"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
