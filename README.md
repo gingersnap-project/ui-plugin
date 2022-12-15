@@ -1,4 +1,4 @@
-# OpenShift Console Plugin Template
+# Gingersnap UI Plugin
 
 [Dynamic plugins](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk)
 allow you to extend the
