@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { load } from 'js-yaml';
 import { Page, Spinner } from '@patternfly/react-core';
-import {ResourceYAMLEditor} from '@openshift-console/dynamic-plugin-sdk';
+import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
 
 // eslint-disable-next-line react/prop-types
 const CreateResourceForm = ({ onCreate, initialResourceYAML }) => {
@@ -20,11 +20,7 @@ const CreateResourceForm = ({ onCreate, initialResourceYAML }) => {
   return (
     <Page>
       <Suspense fallback={<Spinner />}>
-        <ResourceYAMLEditor
-          initialResource={data}
-          header="Create resource"
-          onSave={onSave}
-        />
+        <ResourceYAMLEditor initialResource={data} header="Create resource" onSave={onSave} />
       </Suspense>
     </Page>
   );
