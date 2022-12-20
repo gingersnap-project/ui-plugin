@@ -55,6 +55,7 @@
     "description": "Openshift UI plugin for Gingersnap",
     "exposedModules": {
       "GingersnapPage": "./components/GingersnapPage",
+      "ViewResources": "./components/k8sResource/view/ViewResources",
       "CreateResource": "./components/k8sResource/Create/CreateResource"
     },
     "dependencies": {

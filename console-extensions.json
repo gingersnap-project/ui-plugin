@@ -11,7 +11,15 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/create-resource",
+      "path": "/gingersnap/resources",
+      "component": { "$codeRef": "ViewResources" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": "/gingersnap/create-resource",
       "component": { "$codeRef": "CreateResource" }
     }
   },
@@ -27,9 +35,9 @@
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "gingersnap",
-      "name": "Gingersnap",
-      "href": "/gingersnap",
+      "id": "view-resources",
+      "name": "ViewResources",
+      "href": "/gingersnap/resources",
       "perspective": "admin",
       "section": "gingersnap"
     }
