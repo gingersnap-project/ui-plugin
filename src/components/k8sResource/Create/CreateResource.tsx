@@ -1,22 +1,30 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { k8sCreate, useK8sModel } from '@openshift-console/dynamic-plugin-sdk';
+import { k8sCreate } from '@openshift-console/dynamic-plugin-sdk';
 import { Alert, AlertVariant, AlertGroup, Page, PageSection } from '@patternfly/react-core';
 import { CreateResourceForm } from './CreateResourceForm';
 import { useHistory } from 'react-router-dom';
+import { GingersnapCache } from '../../../utils/models';
 
 const CreateResource = () => {
-  const namespace = 'default';
+  // const namespace = 'default';
   const defaultNotification = { title: '', variant: AlertVariant.default };
-  const [model] = useK8sModel({ group: 'app', version: 'v1', kind: 'ConfigMap' });
   const history = useHistory();
 
   const initialResourceYAML = {
-    apiVersion: 'v1',
-    kind: 'ConfigMap',
+    apiVersion: 'gingersnap-project.io/v1alpha1',
+    kind: 'Cache',
     metadata: {
-      name: 'test',
-      namespace
+      name: 'cache-sample',
+      namespace: 'openshift-operators'
+    },
+    spec: {
+      dataSource: {
+        dbType: 'MYSQL_8',
+        secretRef: {
+          name: 'db-credential-secret'
+        }
+      }
     }
   };
 
@@ -24,7 +32,7 @@ const CreateResource = () => {
   const [notification, setNotification] = useState(defaultNotification);
 
   const createK8SResource = (content) => {
-    k8sCreate({ model: model, data: content })
+    k8sCreate({ model: GingersnapCache, data: content })
       .then(() => {
         setNotification(defaultNotification);
         history.push(`resources`);
