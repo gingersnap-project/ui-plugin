@@ -1,40 +1,33 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { k8sCreate } from '@openshift-console/dynamic-plugin-sdk';
 import { Alert, AlertVariant, AlertGroup, Page, PageSection } from '@patternfly/react-core';
 import { CreateResourceForm } from './CreateResourceForm';
 import { useHistory } from 'react-router-dom';
 import { GingersnapCache } from '../../../utils/models';
+import { cache, eager, lazy } from '../../../utils/initialResource';
 
 const CreateResource = () => {
-  // const namespace = 'default';
   const defaultNotification = { title: '', variant: AlertVariant.default };
+  const [modelType, setModelType] = useState('Cache');
+  let initialResourceYAML: any = cache;
   const history = useHistory();
 
-  const initialResourceYAML = {
-    apiVersion: 'gingersnap-project.io/v1alpha1',
-    kind: 'Cache',
-    metadata: {
-      name: 'cache-sample',
-      namespace: 'openshift-operators'
-    },
-    spec: {
-      dataSource: {
-        dbType: 'MYSQL_8',
-        secretRef: {
-          name: 'db-credential-secret'
-        }
-      }
-    }
-  };
+  useEffect(() => {
+    if (modelType === 'Cache') initialResourceYAML = cache;
+    else if (modelType === 'Eager') initialResourceYAML = eager;
+    else if (modelType === 'Lazy') initialResourceYAML = lazy;
+  }, [modelType]);
 
-  //states
   const [notification, setNotification] = useState(defaultNotification);
 
   const createK8SResource = (content) => {
     k8sCreate({ model: GingersnapCache, data: content })
-      .then(() => {
-        setNotification(defaultNotification);
+      .then((e) => {
+        setNotification({
+          title: `${e.metadata.name} is created`,
+          variant: AlertVariant.success
+        });
         history.push(`resources`);
       })
       .catch((e) => {
@@ -46,13 +39,17 @@ const CreateResource = () => {
   return (
     <Page>
       <PageSection>
-        {notification.title && (
-          <AlertGroup>
-            <Alert title={notification.title} variant={notification.variant} isInline actionClose />
-          </AlertGroup>
+        {notification.title !== '' && (
+          <Alert title={notification.title} variant={notification.variant} isInline actionClose />
         )}
-        <CreateResourceForm onCreate={createK8SResource} initialResourceYAML={initialResourceYAML} />
+        <CreateResourceForm
+          onCreate={createK8SResource}
+          initialResourceYAML={initialResourceYAML}
+          setModelType={setModelType}
+        />
       </PageSection>
+      {console.log('modelType', typeof modelType)}
+      {console.log('intiial', initialResourceYAML)}
     </Page>
   );
 };
