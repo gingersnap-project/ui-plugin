@@ -78,11 +78,7 @@ const ViewResources = () => {
             </>
           )}
         />
-        {console.log('caches', caches)}
-        {console.log('eagerCacheRule', eagerCacheRule)}
-        {console.log('resources', resources)}
-        {console.log('eagerLoadError', eagerLoadError)}
-        {console.log('lazyLoadError', lazyLoadError)}
+        {console.log('cache', caches)}
       </ListPageBody>
     </>
   );
