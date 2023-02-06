@@ -1,13 +1,33 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "dist",
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es2020",
+    "sourceMap": true,
     "jsx": "react",
-    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "strict": false,
-    "noUnusedLocals": false
+    "allowJs": true,
+    "noUnusedLocals": false,
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@services/*": ["src/services/*"],
+      "@providers/*": ["src/providers/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+    "importHelpers": true,
+    "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "node_modules"
+  ]
 }

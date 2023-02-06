@@ -56,7 +56,8 @@
     "exposedModules": {
       "GingersnapPage": "./components/GingersnapPage",
       "ViewResources": "./components/k8sResource/View/ViewResources",
-      "CreateResource": "./components/k8sResource/Create/CreateResource"
+      "CreateResource": "./components/k8sResource/Create/CreateResource",
+      "WizardPage": "./components/Wizard/WizardPage"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
