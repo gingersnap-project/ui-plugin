@@ -3,7 +3,7 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/gingersnap",
+      "path": ["/k8s/ns/:ns/gingersnap", "/k8s/all-namespaces/gingersnap"],
       "component": { "$codeRef": "GingersnapPage" }
     }
   },
@@ -11,7 +11,7 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/gingersnap/resources",
+      "path": ["/k8s/ns/:ns/gingersnap/resources", "/k8s/all-namespaces/gingersnap/resources"],
       "component": { "$codeRef": "ViewResources" }
     }
   },
@@ -19,8 +19,16 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/gingersnap/create-resource",
+      "path": ["/k8s/ns/:ns/gingersnap/create-resource", "/k8s/all-namespaces/gingersnap/create-resource"],
       "component": { "$codeRef": "CreateResource" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": ["/k8s/ns/:ns/gingersnap/create-cache", "/k8s/all-namespaces/gingersnap/create-cache"],
+      "component": { "$codeRef": "WizardPage" }
     }
   },
   {
@@ -28,7 +36,7 @@
     "properties": {
       "id": "gingersnap",
       "perspective": "admin",
-      "name": "Gingersnap",
+      "name": "Caching service",
       "dataAttributes": { "data-quickstart-id": "qs-nav-home" }
     }
   },
@@ -36,8 +44,18 @@
     "type": "console.navigation/href",
     "properties": {
       "id": "view-resources",
-      "name": "ViewResources",
-      "href": "/gingersnap/resources",
+      "name": "View Resources",
+      "href": "/k8s/all-namespaces/gingersnap/resources",
+      "perspective": "admin",
+      "section": "gingersnap"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "create-cache",
+      "name": "Create cache",
+      "href": "/k8s/all-namespaces/gingersnap/create-cache",
       "perspective": "admin",
       "section": "gingersnap"
     }
