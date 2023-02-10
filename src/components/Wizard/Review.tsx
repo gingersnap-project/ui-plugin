@@ -1,37 +1,37 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
+  CodeBlock,
+  CodeBlockAction,
+  CodeBlockCode,
+  ClipboardCopyButton,
   Form,
   FormGroup,
   FormSection,
   Tabs,
   Tab,
   TabTitleText,
-  TabTitleIcon,
-  Page,
-  PageSection,
-  Radio,
-  Select,
-  SelectVariant,
-  SelectOption,
-  TextInput
+  TabTitleIcon
 } from '@patternfly/react-core';
 import { useCreateWizard } from '../../services/createWizardHook';
+import { createConfigFromData } from '../../utils/crConfig';
+import YAML from 'yaml';
+import { load } from 'js-yaml';
 
-const CacheType = () => {
-  const { configuration, setConfiguration } = useCreateWizard();
-
-  const [dataCaptureMethod, setDataCaptureMethod] = useState(configuration.dataCaptureMethod);
+const Review = () => {
+  const { configuration } = useCreateWizard();
+  const yamlConfig = YAML.stringify(load(createConfigFromData(configuration)));
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
+  const [copied, setCopied] = React.useState(false);
 
-  useEffect(() => {
-    setConfiguration((prevState) => {
-      return {
-        ...prevState,
-        dataCaptureMethod: dataCaptureMethod
-      };
-    });
-  }, [dataCaptureMethod]);
+  const clipboardCopyFunc = (event, text) => {
+    navigator.clipboard.writeText(text.toString());
+  };
+
+  const onClick = (event, text) => {
+    clipboardCopyFunc(event, text);
+    setCopied(true);
+  };
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
@@ -65,13 +65,29 @@ const CacheType = () => {
             </>
           }
         >
-          <FormSection title="Configuration" titleElement="h3">
-            <FormGroup fieldId="data-capture" isInline isRequired></FormGroup>
-          </FormSection>
+          <CodeBlock
+            actions={
+              <CodeBlockAction>
+                <ClipboardCopyButton
+                  id="basic-copy-button"
+                  textId="code-content"
+                  aria-label="Copy to clipboard"
+                  onClick={(e) => onClick(e, yamlConfig)}
+                  exitDelay={copied ? 1500 : 600}
+                  maxWidth="110px"
+                  variant="plain"
+                >
+                  {copied ? 'Successfully copied to clipboard!' : 'Copy to clipboard'}
+                </ClipboardCopyButton>
+              </CodeBlockAction>
+            }
+          >
+            <CodeBlockCode id="code-content">{yamlConfig}</CodeBlockCode>
+          </CodeBlock>
         </Tab>
       </Tabs>
     </Form>
   );
 };
 
-export default CacheType;
+export default Review;

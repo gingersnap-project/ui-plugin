@@ -4,13 +4,13 @@ import { k8sCreate } from '@openshift-console/dynamic-plugin-sdk';
 import { Alert, AlertVariant, AlertGroup, Page, PageSection } from '@patternfly/react-core';
 import { CreateResourceForm } from './CreateResourceForm';
 import { useHistory } from 'react-router-dom';
-import { GingersnapCache } from '../../../utils/models';
+import { GingersnapCache, GingersnapEagerCacheRule, GingersnapLazyCacheRule } from '../../../utils/models';
 import { cache, eager, lazy } from '../../../utils/initialResource';
 
 const CreateResource = () => {
   const defaultNotification = { title: '', variant: AlertVariant.default };
-  const [modelType, setModelType] = useState('Cache');
-  let initialResourceYAML: any = cache;
+  const [modelType, setModelType] = useState('Eager');
+  let initialResourceYAML: any = lazy;
   const history = useHistory();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const CreateResource = () => {
   const [notification, setNotification] = useState(defaultNotification);
 
   const createK8SResource = (content) => {
-    k8sCreate({ model: GingersnapCache, data: content })
+    k8sCreate({ model: GingersnapLazyCacheRule, data: content })
       .then((e) => {
         setNotification({
           title: `${e.metadata.name} is created`,
@@ -48,8 +48,6 @@ const CreateResource = () => {
           setModelType={setModelType}
         />
       </PageSection>
-      {console.log('modelType', typeof modelType)}
-      {console.log('intiial', initialResourceYAML)}
     </Page>
   );
 };
