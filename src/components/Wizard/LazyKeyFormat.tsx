@@ -24,23 +24,29 @@ const LazyKeyFormat = () => {
   const [queryString, setQueryString] = useState(configuration.lazyKeyFormat.queryString);
   const [keyFormat, setKeyFormat] = useState(configuration.lazyKeyFormat.keyFormat);
   const [keySeperator, setKeySeperator] = useState(configuration.lazyKeyFormat.keySeperator);
-  const [key, setKey] = useState('');
+
+  const [isKeyFormatOpen, setIsKeyFormatOpen] = useState(false);
 
   useEffect(() => {
-    setKey(queryString.concat(' : ', keyFormat, ' : ', keySeperator));
     setConfiguration((prevState) => {
       return {
         ...prevState,
         lazyKeyFormat: {
           queryString: queryString,
           keyFormat: keyFormat,
-          keySeperator: keySeperator
+          keySeperator: keySeperator,
+          valid: queryString.length > 0
         }
       };
     });
   }, [queryString, keyFormat, keySeperator]);
 
-  const keyValue = queryString && keyFormat && keySeperator ? key : '';
+  const keyValue = keySeperator && `<key1> ${keySeperator} <key2>`;
+
+  const onSelectTable = (event, selection, placeholder) => {
+    setKeyFormat(selection);
+    setIsKeyFormatOpen(false);
+  };
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
@@ -53,11 +59,21 @@ const LazyKeyFormat = () => {
             <TextInput value={keyValue} type="text" isReadOnly />
           </FlexItem>
         </Flex>
-        <FormGroup label="Query string" fieldId="query-string" isInline>
+        <FormGroup isRequired label="Query string" fieldId="query-string" isInline>
           <TextInput type="text" value={queryString} onChange={setQueryString} />
         </FormGroup>
         <FormGroup label="Key format" fieldId="key-format" isInline>
-          <TextInput type="text" value={keyFormat} onChange={setKeyFormat} />
+          <Select
+            placeholderText="Choose format"
+            variant={SelectVariant.single}
+            onToggle={() => setIsKeyFormatOpen(!isKeyFormatOpen)}
+            onSelect={onSelectTable}
+            selections={keyFormat}
+            isOpen={isKeyFormatOpen}
+          >
+            <SelectOption key={0} value="Text"></SelectOption>
+            <SelectOption key={1} value="JSON"></SelectOption>
+          </Select>
         </FormGroup>
         <FormGroup label="Key seperator" fieldId="key-seperator" isInline>
           <TextInput type="text" value={keySeperator} onChange={setKeySeperator} />

@@ -10,24 +10,33 @@ interface ConnectionDetail {
 
 interface GettingStartedState {
   createMethod: 'create' | 'existing';
-  connectionMethod: 'rhoda' | 'define' | 'existing';
+  connectionMethod?: 'rhoda' | 'define' | 'existing';
   rhodaConnection?: string;
   connectionDetail?: ConnectionDetail;
   existingConnection?: string;
   existingCache?: string;
+  valid: boolean;
+}
+
+interface DataCaptureMethod {
+  cacheType: 'lazy' | 'eager';
+  crName: string;
+  valid: boolean;
 }
 
 interface LazyKeyFormat {
-  queryString?: string;
+  queryString: string;
   keyFormat?: string;
   keySeperator?: string;
+  valid: boolean;
 }
 
 interface CacheDetails {
-  cacheName?: string;
+  cacheName: string;
   dataSetSize?: number;
   diskTradeoff?: number;
   deploymentType?: string;
+  valid: boolean;
 }
 
 interface EagerKeyFormat {
@@ -41,7 +50,7 @@ interface EagerKeyFormat {
 
 interface WizardConfiguration {
   start: GettingStartedState;
-  dataCaptureMethod: 'lazy' | 'eager';
+  dataCaptureMethod: DataCaptureMethod;
   lazyKeyFormat?: LazyKeyFormat;
   eagerKeyFormat?: EagerKeyFormat;
   cacheDetails?: CacheDetails;

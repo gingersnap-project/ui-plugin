@@ -17,41 +17,51 @@ import { useCreateWizard } from '../../services/createWizardHook';
 const CacheType = () => {
   const { configuration, setConfiguration } = useCreateWizard();
 
-  const [dataCaptureMethod, setDataCaptureMethod] = useState(configuration.dataCaptureMethod);
+  const [cacheType, setCacheType] = useState(configuration.dataCaptureMethod.cacheType);
+  const [crName, setCRName] = useState(configuration.dataCaptureMethod.crName);
 
   useEffect(() => {
     setConfiguration((prevState) => {
       return {
         ...prevState,
-        dataCaptureMethod: dataCaptureMethod
+        dataCaptureMethod: {
+          cacheType: cacheType,
+          crName: crName,
+          valid: crName.length > 0
+        }
       };
     });
-  }, [dataCaptureMethod]);
+  }, [cacheType, crName]);
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <FormSection title="Type of data capture" titleElement="h3">
-        <FormGroup fieldId="data-capture" isInline isRequired>
+        <FormGroup fieldId="cache-type" isInline isRequired>
           <Radio
-            name="data-capture-radio"
+            name="cache-type-radio"
             id="lazy"
             onChange={() => {
-              setDataCaptureMethod('lazy');
+              setCacheType('lazy');
             }}
-            isChecked={dataCaptureMethod === 'lazy'}
+            isChecked={cacheType === 'lazy'}
             label="Lazy"
             description={'Description'}
           />
           <Radio
-            name="data-capture-radio"
+            name="cache-type-radio"
             id="eager"
             onChange={() => {
-              setDataCaptureMethod('eager');
+              setCacheType('eager');
             }}
-            isChecked={dataCaptureMethod === 'eager'}
+            isChecked={cacheType === 'eager'}
             label="Eager"
             description={'Description'}
           />
+        </FormGroup>
+      </FormSection>
+      <FormSection title="CR info">
+        <FormGroup fieldId="cr-name" label={'CR Name'} isInline isRequired>
+          <TextInput value={crName} onChange={setCRName} type="text" />
         </FormGroup>
       </FormSection>
     </Form>

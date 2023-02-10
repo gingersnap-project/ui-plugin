@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { EmptyState, EmptyStateBody, EmptyStateIcon } from '@patternfly/react-core';
 import {
   ListPageHeader,
   ListPageBody,
@@ -10,6 +11,7 @@ import {
   TableData,
   Timestamp
 } from '@openshift-console/dynamic-plugin-sdk';
+import { CubesIcon, SearchIcon } from '@patternfly/react-icons';
 import { GingersnapCache, GingersnapEagerCacheRule, GingersnapLazyCacheRule } from '../../../utils/models';
 import { useListResources } from '../../../services/resourcesHook';
 
@@ -44,10 +46,28 @@ const ViewResources = () => {
     setResources([...caches, ...eagerCacheRule, ...lazyCacheRule]);
   }, [cacheLoading, eagerLoading, lazyLoading]);
 
+  const NoDataEmptyMsg = () => {
+    return (
+      <EmptyState>
+        <EmptyStateIcon icon={CubesIcon} />
+        <EmptyStateBody>No data available</EmptyStateBody>
+      </EmptyState>
+    );
+  };
+
+  const EmptyMsg = () => {
+    return (
+      <EmptyState>
+        <EmptyStateIcon icon={CubesIcon} />
+        <EmptyStateBody>No data found for applied filter</EmptyStateBody>
+      </EmptyState>
+    );
+  };
+
   return (
     <>
       <ListPageHeader title="Gingersnap k8s Resources">
-        <ListPageCreateLink to={'create-resource'}>Create Resource</ListPageCreateLink>
+        <ListPageCreateLink to={'create-cache'}>Create Resource</ListPageCreateLink>
       </ListPageHeader>
       <ListPageBody>
         <ListPageFilter
@@ -61,6 +81,8 @@ const ViewResources = () => {
           columns={columns}
           loaded={cacheLoading || eagerLoading || lazyLoading}
           loadError={cacheLoadError}
+          NoDataEmptyMsg={NoDataEmptyMsg}
+          EmptyMsg={EmptyMsg}
           Row={({ obj, activeColumnIDs, rowData }) => (
             <>
               <TableData id={columns[0].id} activeColumnIDs={activeColumnIDs}>
@@ -78,7 +100,6 @@ const ViewResources = () => {
             </>
           )}
         />
-        {console.log('cache', caches)}
       </ListPageBody>
     </>
   );

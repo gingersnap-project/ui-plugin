@@ -23,14 +23,13 @@ const GettingStarted = () => {
   const [rhodaConnection, setRhodaConnection] = useState<string>(configuration.start.rhodaConnection);
   const [isOpenRhodaConnection, setIsOpenRhodaConnection] = useState(false);
 
-  const connectionDetail = configuration.start.connectionDetail;
-  const [connectionName, setConnectionName] = useState(connectionDetail.name);
-  const [connectionType, setConnectionType] = useState(connectionDetail.type);
-  const [connectionUsername, setConnectionUsername] = useState(connectionDetail.username);
-  const [connectionPassword, setConnectionPassword] = useState(connectionDetail.password);
-  const [connectionDatabase, setConnectionDatabase] = useState(connectionDetail.database);
-  const [connectionHost, setConnectionHost] = useState(connectionDetail.host);
-  const [connectionPort, setConnectionPort] = useState(connectionDetail.port);
+  const [connectionName, setConnectionName] = useState(configuration.start.connectionDetail?.name);
+  const [connectionType, setConnectionType] = useState(configuration.start.connectionDetail?.type);
+  const [connectionUsername, setConnectionUsername] = useState(configuration.start.connectionDetail?.username);
+  const [connectionPassword, setConnectionPassword] = useState(configuration.start.connectionDetail?.password);
+  const [connectionDatabase, setConnectionDatabase] = useState(configuration.start.connectionDetail?.database);
+  const [connectionHost, setConnectionHost] = useState(configuration.start.connectionDetail?.host);
+  const [connectionPort, setConnectionPort] = useState(configuration.start.connectionDetail?.port);
 
   const [existingConnection, setExistingConnection] = useState(configuration.start.existingConnection);
   const [isOpenExistingConnection, setIsOpenExistingConnection] = useState(false);
@@ -56,7 +55,8 @@ const GettingStarted = () => {
             port: connectionPort
           },
           existingConnection: existingConnection,
-          existingCache: existingCache
+          existingCache: existingCache,
+          valid: createMethod !== undefined
         }
       };
     });

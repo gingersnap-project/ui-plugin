@@ -33,7 +33,8 @@ const CacheDetails = () => {
           cacheName: cacheName,
           dataSetSize: dataSetSize,
           diskTradeoff: diskTradeoff,
-          deploymentType: deploymentType
+          deploymentType: deploymentType,
+          valid: cacheName.length > 0
         }
       };
     });
@@ -47,7 +48,7 @@ const CacheDetails = () => {
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <FormSection title="Cache details" titleElement="h3">
-        <FormGroup label={'Cache name'} fieldId="cache-name" isInline>
+        <FormGroup isRequired label={'Cache name'} fieldId="cache-name" isInline>
           <TextInput type="text" value={cacheName} onChange={setCacheName} />
         </FormGroup>
         <FormGroup label={'Estimated data set size'} fieldId="data-set-size" isInline>
