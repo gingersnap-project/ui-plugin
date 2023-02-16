@@ -15,6 +15,7 @@ import {
 } from '@patternfly/react-core';
 import { useCreateWizard } from '../../services/createWizardHook';
 import { createConfigFromData } from '../../utils/crConfig';
+import ReviewSummary from './ReviewSummary';
 import YAML from 'yaml';
 import { load } from 'js-yaml';
 
@@ -52,8 +53,8 @@ const Review = () => {
           }
           aria-label="filled tabs with icons content users"
         >
-          <FormSection title="Cache details" titleElement="h3">
-            <FormGroup fieldId="data-capture" isInline isRequired></FormGroup>
+          <FormSection>
+            <ReviewSummary />
           </FormSection>
         </Tab>
         <Tab

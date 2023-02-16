@@ -25,7 +25,10 @@ const CacheDetailsInitialState: CacheDetails = {
 };
 
 const EagerKeyFormatInitialState: EagerKeyFormat = {
-  table: ''
+  table: '',
+  keys: [],
+  values: [],
+  valid: false
 };
 
 const wizardConfigurationInitialState: WizardConfiguration = {

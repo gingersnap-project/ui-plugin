@@ -40,6 +40,16 @@ const CreateWizard = () => {
     showEagerCache: false
   });
 
+  const canJumpToCacheDetails = (): boolean => {
+    return configuration.dataCaptureMethod.cacheType === 'lazy'
+      ? configuration.lazyKeyFormat.valid
+      : configuration.eagerKeyFormat.valid;
+  };
+
+  const keyFormatComponent = () => {
+    return configuration.dataCaptureMethod.cacheType === 'lazy' ? <LazyKeyFormat /> : <EagerKeyFormat />;
+  };
+
   // Steps
   const stepGettingStarted = {
     id: 1,
@@ -57,36 +67,30 @@ const CreateWizard = () => {
     enableNext: configuration.dataCaptureMethod.valid
   };
 
-  const stepLazyKeyFormat = {
+  const stepKeyFormat = {
     id: 3,
     name: 'Key format',
-    component: <LazyKeyFormat />
+    component: keyFormatComponent()
   };
 
   const stepCacheDetails = {
     id: 4,
     name: 'Cache details',
-    component: <CacheDetails />
-  };
-
-  const stepEagerKeyFormat = {
-    id: 5,
-    name: 'Key format',
-    component: <EagerKeyFormat />
+    component: <CacheDetails />,
+    canJumpTo: canJumpToCacheDetails()
   };
 
   const stepReview = {
-    id: 6,
+    id: 5,
     name: 'Review',
     component: <Review />,
-    canJumpTo: false
+    canJumpTo: true
   };
 
   const steps = [
     stepGettingStarted,
-    stepDataCapture,
-    ...(stateObj.showLazyCache ? [stepLazyKeyFormat, stepCacheDetails] : []),
-    ...(stateObj.showEagerCache ? [stepEagerKeyFormat] : []),
+    ...(configuration.start.valid ? [stepDataCapture] : []),
+    ...(stateObj.showLazyCache || stateObj.showEagerCache ? [stepKeyFormat, stepCacheDetails] : []),
     stepReview
   ];
 
@@ -146,7 +150,7 @@ const CreateWizard = () => {
         activeButton = configuration.dataCaptureMethod.valid;
         break;
       case 3:
-        activeButton = configuration.lazyKeyFormat.valid;
+        activeButton = canJumpToCacheDetails();
         break;
       case 4:
         activeButton = configuration.cacheDetails.valid;
@@ -159,7 +163,7 @@ const CreateWizard = () => {
 
   const nextOrCreateToolbarItem = (activeStep, onNext) => {
     const activeStepId = activeStep.id;
-    const buttonId = activeStepId === 6 ? 'create-cache' : 'next-step';
+    const buttonId = activeStepId === 5 ? 'create-cache' : 'next-step';
     return (
       <ToolbarItem>
         <Button
@@ -171,7 +175,7 @@ const CreateWizard = () => {
           isDisabled={isButtonNextDisabled(activeStep.id)}
           data-cy="wizardNextButton"
         >
-          {activeStepId === 6 ? 'Create' : 'Next'}
+          {activeStepId === 5 ? 'Create' : 'Next'}
         </Button>
       </ToolbarItem>
     );
@@ -206,7 +210,7 @@ const CreateWizard = () => {
   };
 
   const createK8SResource = (content, model) => {
-    k8sCreate({ model: GingersnapLazyCacheRule, data: content })
+    k8sCreate({ model: model, data: content })
       .then((e) => {
         setNotification({
           title: `${e.metadata.name} is created`,
@@ -222,9 +226,13 @@ const CreateWizard = () => {
 
   const onSave = () => {
     const config = load(createConfigFromData(configuration));
-    const model = configuration.dataCaptureMethod.cacheType === 'lazy' ? 'LazyCacheRule' : 'EagerCacheRule';
-
+    const model =
+      configuration.dataCaptureMethod.cacheType === 'lazy' ? GingersnapLazyCacheRule : GingersnapEagerCacheRule;
     createK8SResource(config, model);
+  };
+
+  const closeWizard = () => {
+    history.push('resources');
   };
 
   const CustomFooter = (
@@ -254,7 +262,7 @@ const CreateWizard = () => {
       <Wizard
         navAriaLabel={`steps`}
         mainAriaLabel={`content`}
-        onClose={() => console.log('close')}
+        onClose={closeWizard}
         onSave={onSave}
         steps={steps}
         footer={CustomFooter}

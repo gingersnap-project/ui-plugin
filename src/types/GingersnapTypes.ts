@@ -40,12 +40,13 @@ interface CacheDetails {
 }
 
 interface EagerKeyFormat {
-  table?: string;
+  table: string;
   fields?: string;
-  keys?: string;
-  values?: string;
+  keys: string[];
+  values?: string[];
   keyFormat?: string;
   keySeperator?: string;
+  valid: boolean;
 }
 
 interface WizardConfiguration {
