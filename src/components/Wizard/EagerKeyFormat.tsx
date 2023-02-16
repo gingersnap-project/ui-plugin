@@ -1,107 +1,104 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import {
-  DragDrop,
-  Draggable,
-  Droppable,
-  Split,
-  SplitItem,
+  Flex,
+  FlexItem,
   Form,
   FormGroup,
   FormSection,
-  Flex,
-  FlexItem,
-  Page,
-  PageSection,
-  Radio,
+  TextInput,
   Select,
   SelectVariant,
-  SelectOption,
-  TextContent,
-  Text,
-  TextInput
+  SelectOption
 } from '@patternfly/react-core';
 import { useCreateWizard } from '../../services/createWizardHook';
-
-const getItems = (count: number, startIndex: number) =>
-  Array.from({ length: count }, (_, idx) => idx + startIndex).map((idx) => ({
-    id: `item-${idx}`,
-    content: `item ${idx} `.repeat(idx === 4 ? 20 : 1)
-  }));
-
-const reorder = (list, startIndex: number, endIndex: number) => {
-  const result = list;
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
-const move = (source, destination, sourceIndex: number, destIndex: number) => {
-  const sourceClone = source;
-  const destClone = destination;
-  const [removed] = sourceClone.splice(sourceIndex, 1);
-  destClone.splice(destIndex, 0, removed);
-  return [sourceClone, destClone];
-};
 
 const EagerKeyFormat = () => {
   const { configuration, setConfiguration } = useCreateWizard();
 
-  const [items, setItems] = React.useState({
-    items1: getItems(10, 0),
-    items2: getItems(5, 10)
-  });
-
   const [table, setTable] = useState(configuration.eagerKeyFormat.table);
   const [isOpenTable, setIsOpenTable] = useState(false);
+
+  const [keys, setKeys] = useState<string[]>(configuration.eagerKeyFormat.keys);
+  const [isOpenKeys, setIsOpenKeys] = useState(false);
+
+  const [values, setValues] = useState<string[]>(configuration.eagerKeyFormat.values);
+  const [isOpenValues, setIsOpenValues] = useState(false);
+
+  const [keySeperator, setKeySeperator] = useState(configuration.eagerKeyFormat.keySeperator);
+  const [keyFormat, setKeyFormat] = useState(configuration.eagerKeyFormat.keyFormat);
+  const [isOpenKeyFormat, setIsOpenKeyFormat] = useState(false);
+
+  useEffect(() => {
+    setConfiguration((prevState) => {
+      return {
+        ...prevState,
+        eagerKeyFormat: {
+          table: table,
+          keys: keys,
+          values: values,
+          keyFormat: keyFormat,
+          keySeperator: keySeperator,
+          valid: table.length > 0 && keys.length > 0
+        }
+      };
+    });
+  }, [table, keys, values, keyFormat, keySeperator]);
+
+  const fields = [
+    'Field 1',
+    'Field 2',
+    'Field 3',
+    'Field 4',
+    'Field 5',
+    'Field 6',
+    'Field 7',
+    'Field 8',
+    'Field 9',
+    'Field 10',
+    'Field 11'
+  ];
 
   const onSelectTable = (event, selection, placeholder) => {
     setTable(selection);
     setIsOpenTable(false);
   };
 
-  const onDrop = (source, dest) => {
-    // eslint-disable-next-line no-console
-    console.log(source, dest);
-    if (dest) {
-      if (source.droppableId === dest.droppableId) {
-        const newItems = reorder(
-          source.droppableId === 'items1' ? items.items1 : items.items2,
-          source.index,
-          dest.index
-        );
-        if (source.droppableId === 'items1') {
-          setItems({
-            items1: newItems,
-            items2: items.items2
-          });
-        } else {
-          setItems({
-            items1: items.items1,
-            items2: newItems
-          });
-        }
-      } else {
-        const [newItems1, newItems2] = move(
-          source.droppableId === 'items1' ? items.items1 : items.items2,
-          dest.droppableId === 'items1' ? items.items1 : items.items2,
-          source.index,
-          dest.index
-        );
-        setItems({
-          items1: source.droppableId === 'items1' ? newItems1 : newItems2,
-          items2: dest.droppableId === 'items1' ? newItems1 : newItems2
-        });
-      }
-      return true;
+  const onSelectKey = (event, selection, placeholder) => {
+    let actualSelection;
+
+    if (keys.includes(selection)) {
+      actualSelection = keys.filter((item) => item !== selection);
+    } else {
+      actualSelection = [...keys, selection];
     }
-    return false;
+    setKeys(actualSelection);
+  };
+
+  const onSelectValue = (event, selection, placeholder) => {
+    let actualSelection;
+
+    if (values.includes(selection)) {
+      actualSelection = values.filter((item) => item !== selection);
+    } else {
+      actualSelection = [...values, selection];
+    }
+    setValues(actualSelection);
+  };
+
+  const fieldOptions = () => {
+    return fields.map((field) => <SelectOption id={field} key={field} value={field} />);
+  };
+
+  const onSelectKeyFormat = (event, selection, placeholder) => {
+    setKeyFormat(selection);
+    setIsOpenKeyFormat(false);
   };
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <FormSection title="Eager" titleElement="h3">
-        <FormGroup label="Table" fieldId="table" isInline>
+        <FormGroup isRequired label="Table" fieldId="table" isInline>
           <Select
             placeholderText="Choose table"
             variant={SelectVariant.single}
@@ -110,28 +107,63 @@ const EagerKeyFormat = () => {
             selections={table}
             isOpen={isOpenTable}
           >
-            <SelectOption key={0} value="Table 1"></SelectOption>
-            <SelectOption key={1} value="Table 2"></SelectOption>
-            <SelectOption key={2} value="Table 3"></SelectOption>
+            <SelectOption key={0} value="Table 1" />
+            <SelectOption key={1} value="Table 2" />
+            <SelectOption key={2} value="Table 3" />
           </Select>
         </FormGroup>
       </FormSection>
       <FormSection title={'Fields'}>
-        <DragDrop onDrop={onDrop}>
-          <Split hasGutter>
-            {Object.entries(items).map(([key, subitems]) => (
-              <SplitItem key={key} style={{ flex: 1 }}>
-                <Droppable zone="multizone" droppableId={key}>
-                  {subitems.map(({ id, content }) => (
-                    <Draggable key={id} style={{ padding: '8px' }}>
-                      {content}
-                    </Draggable>
-                  ))}
-                </Droppable>
-              </SplitItem>
-            ))}
-          </Split>
-        </DragDrop>
+        <Flex fullWidth={{ default: 'fullWidth' }}>
+          <FlexItem style={{ width: '15rem' }}>
+            <FormGroup isRequired label={'Keys'} fieldId="key" isInline>
+              <Select
+                placeholderText="Choose keys"
+                variant={SelectVariant.checkbox}
+                onToggle={() => setIsOpenKeys(!isOpenKeys)}
+                onSelect={onSelectKey}
+                selections={keys}
+                isOpen={isOpenKeys}
+                maxHeight={200}
+              >
+                {fieldOptions()}
+              </Select>
+            </FormGroup>
+          </FlexItem>
+          <FlexItem style={{ width: '15rem' }}>
+            <FormGroup label={'Values'} fieldId="value" isInline>
+              <Select
+                placeholderText="Choose values"
+                variant={SelectVariant.checkbox}
+                onToggle={() => setIsOpenValues(!isOpenValues)}
+                onSelect={onSelectValue}
+                selections={values}
+                isOpen={isOpenValues}
+                maxHeight={200}
+              >
+                {fieldOptions()}
+              </Select>
+            </FormGroup>
+          </FlexItem>
+        </Flex>
+      </FormSection>
+      <FormSection>
+        <FormGroup label={'Key seperator'} fieldId="key-seperator">
+          <TextInput aria-label="key-seperator" value={keySeperator} type="text" onChange={setKeySeperator} />
+        </FormGroup>
+        <FormGroup label={'Key format'} fieldId="key-format">
+          <Select
+            placeholderText="Choose format"
+            variant={SelectVariant.single}
+            onToggle={() => setIsOpenKeyFormat(!isOpenKeyFormat)}
+            onSelect={onSelectKeyFormat}
+            selections={keyFormat}
+            isOpen={isOpenKeyFormat}
+          >
+            <SelectOption key={0} value="Text"></SelectOption>
+            <SelectOption key={1} value="JSON"></SelectOption>
+          </Select>
+        </FormGroup>
       </FormSection>
     </Form>
   );

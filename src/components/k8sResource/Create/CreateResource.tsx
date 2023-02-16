@@ -22,7 +22,7 @@ const CreateResource = () => {
   const [notification, setNotification] = useState(defaultNotification);
 
   const createK8SResource = (content) => {
-    k8sCreate({ model: GingersnapLazyCacheRule, data: content })
+    k8sCreate({ model: GingersnapEagerCacheRule, data: content })
       .then((e) => {
         setNotification({
           title: `${e.metadata.name} is created`,

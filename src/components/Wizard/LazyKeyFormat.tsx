@@ -43,7 +43,7 @@ const LazyKeyFormat = () => {
 
   const keyValue = keySeperator && `<key1> ${keySeperator} <key2>`;
 
-  const onSelectTable = (event, selection, placeholder) => {
+  const onSelectKeyFormat = (event, selection, placeholder) => {
     setKeyFormat(selection);
     setIsKeyFormatOpen(false);
   };
@@ -67,7 +67,7 @@ const LazyKeyFormat = () => {
             placeholderText="Choose format"
             variant={SelectVariant.single}
             onToggle={() => setIsKeyFormatOpen(!isKeyFormatOpen)}
-            onSelect={onSelectTable}
+            onSelect={onSelectKeyFormat}
             selections={keyFormat}
             isOpen={isKeyFormatOpen}
           >

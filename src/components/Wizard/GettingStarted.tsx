@@ -266,6 +266,7 @@ const GettingStarted = () => {
             description={'Description'}
           />
           <Radio
+            isDisabled
             name="create-method-radio"
             id="existing-cache"
             onChange={() => {
