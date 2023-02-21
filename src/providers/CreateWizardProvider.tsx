@@ -9,7 +9,7 @@ const GettingStartedInitialState: GettingStartedState = {
 };
 
 const DataCaptureMethodInitialState: DataCaptureMethod = {
-  cacheType: 'lazy',
+  cacheType: '',
   crName: '',
   valid: false
 };
@@ -31,9 +31,16 @@ const EagerKeyFormatInitialState: EagerKeyFormat = {
   valid: false
 };
 
+const CacheCRInfoInitialState: CacheCRInfo = {
+  dbType: '',
+  secretRef: '',
+  valid: false
+};
+
 const wizardConfigurationInitialState: WizardConfiguration = {
   start: GettingStartedInitialState,
   dataCaptureMethod: DataCaptureMethodInitialState,
+  cacheCRInfo: CacheCRInfoInitialState,
   lazyKeyFormat: LazyKeyFormatInitialState,
   cacheDetails: CacheDetailsInitialState,
   eagerKeyFormat: EagerKeyFormatInitialState

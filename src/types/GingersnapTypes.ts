@@ -19,7 +19,7 @@ interface GettingStartedState {
 }
 
 interface DataCaptureMethod {
-  cacheType: 'lazy' | 'eager';
+  cacheType: string;
   crName: string;
   valid: boolean;
 }
@@ -49,9 +49,16 @@ interface EagerKeyFormat {
   valid: boolean;
 }
 
+interface CacheCRInfo {
+  dbType: string;
+  secretRef: string;
+  valid: boolean;
+}
+
 interface WizardConfiguration {
   start: GettingStartedState;
   dataCaptureMethod: DataCaptureMethod;
+  cacheCRInfo?: CacheCRInfo;
   lazyKeyFormat?: LazyKeyFormat;
   eagerKeyFormat?: EagerKeyFormat;
   cacheDetails?: CacheDetails;
