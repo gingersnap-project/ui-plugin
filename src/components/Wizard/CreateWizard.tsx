@@ -22,11 +22,13 @@ import LazyKeyFormat from './LazyKeyFormat';
 import CacheDetails from './CacheDetails';
 import EagerKeyFormat from './EagerKeyFormat';
 import Review from './Review';
+import CacheCRInfo from './CacheCRInfo';
 import { createConfigFromData } from '../../utils/crConfig';
 import { k8sCreate } from '@openshift-console/dynamic-plugin-sdk';
 import { useHistory } from 'react-router-dom';
 import { load } from 'js-yaml';
 import { GingersnapCache, GingersnapEagerCacheRule, GingersnapLazyCacheRule } from '../../utils/models';
+import { CRType } from '../../utils/gingersnapRefData';
 
 const CreateWizard = () => {
   const { configuration } = useCreateWizard();
@@ -41,13 +43,21 @@ const CreateWizard = () => {
   });
 
   const canJumpToCacheDetails = (): boolean => {
-    return configuration.dataCaptureMethod.cacheType === 'lazy'
+    return configuration.dataCaptureMethod.cacheType === CRType.Lazy
       ? configuration.lazyKeyFormat.valid
-      : configuration.eagerKeyFormat.valid;
+      : configuration.dataCaptureMethod.cacheType === CRType.Eager
+      ? configuration.eagerKeyFormat.valid
+      : false;
   };
 
   const keyFormatComponent = () => {
-    return configuration.dataCaptureMethod.cacheType === 'lazy' ? <LazyKeyFormat /> : <EagerKeyFormat />;
+    return configuration.dataCaptureMethod.cacheType === CRType.Lazy ? (
+      <LazyKeyFormat />
+    ) : configuration.dataCaptureMethod.cacheType === CRType.Eager ? (
+      <EagerKeyFormat />
+    ) : (
+      <></>
+    );
   };
 
   // Steps
@@ -67,37 +77,49 @@ const CreateWizard = () => {
     enableNext: configuration.dataCaptureMethod.valid
   };
 
-  const stepKeyFormat = {
+  const stepCacheCR = {
     id: 3,
+    name: 'Info',
+    component: <CacheCRInfo />,
+    canJumpTo: configuration.dataCaptureMethod.valid
+  };
+
+  const stepKeyFormat = {
+    id: 4,
     name: 'Key format',
-    component: keyFormatComponent()
+    component: keyFormatComponent(),
+    canJumpTo: configuration.dataCaptureMethod.valid
   };
 
   const stepCacheDetails = {
-    id: 4,
+    id: 5,
     name: 'Cache details',
     component: <CacheDetails />,
     canJumpTo: canJumpToCacheDetails()
   };
 
   const stepReview = {
-    id: 5,
+    id: 6,
     name: 'Review',
     component: <Review />,
-    canJumpTo: true
+    canJumpTo: false
   };
 
   const steps = [
     stepGettingStarted,
     ...(configuration.start.valid ? [stepDataCapture] : []),
-    ...(stateObj.showLazyCache || stateObj.showEagerCache ? [stepKeyFormat, stepCacheDetails] : []),
+    ...(configuration.dataCaptureMethod.cacheType === CRType.Cache ? [stepCacheCR] : []),
+    ...(configuration.dataCaptureMethod.cacheType === CRType.Lazy ||
+    configuration.dataCaptureMethod.cacheType === CRType.Eager
+      ? [stepKeyFormat, stepCacheDetails]
+      : []),
     stepReview
   ];
 
   const getNextStep = (event, activeStep, callback) => {
     event.stopPropagation();
     if (activeStep.id === 2) {
-      if (configuration.dataCaptureMethod.cacheType === 'lazy') {
+      if (configuration.dataCaptureMethod.cacheType === CRType.Lazy) {
         setStateObj(
           {
             showLazyCache: true,
@@ -105,7 +127,7 @@ const CreateWizard = () => {
           },
           () => callback()
         );
-      } else if (configuration.dataCaptureMethod.cacheType === 'eager') {
+      } else if (configuration.dataCaptureMethod.cacheType === CRType.Eager) {
         setStateObj(
           {
             showLazyCache: false,
@@ -113,6 +135,8 @@ const CreateWizard = () => {
           },
           () => callback()
         );
+      } else {
+        callback();
       }
     } else {
       callback();
@@ -121,7 +145,7 @@ const CreateWizard = () => {
 
   const getPreviousStep = (event, activeStep, callback) => {
     event.stopPropagation();
-    if (configuration.dataCaptureMethod.cacheType === 'lazy') {
+    if (configuration.dataCaptureMethod.cacheType === CRType.Lazy) {
       setStateObj(
         {
           ...stateObj,
@@ -129,7 +153,7 @@ const CreateWizard = () => {
         },
         () => callback()
       );
-    } else if (configuration.dataCaptureMethod.cacheType === 'eager') {
+    } else if (configuration.dataCaptureMethod.cacheType === CRType.Eager) {
       setStateObj(
         {
           ...stateObj,
@@ -137,6 +161,8 @@ const CreateWizard = () => {
         },
         () => callback()
       );
+    } else {
+      callback();
     }
   };
 
@@ -150,9 +176,12 @@ const CreateWizard = () => {
         activeButton = configuration.dataCaptureMethod.valid;
         break;
       case 3:
-        activeButton = canJumpToCacheDetails();
+        activeButton = configuration.cacheCRInfo.valid;
         break;
       case 4:
+        activeButton = canJumpToCacheDetails();
+        break;
+      case 5:
         activeButton = configuration.cacheDetails.valid;
         break;
       default:
@@ -163,7 +192,7 @@ const CreateWizard = () => {
 
   const nextOrCreateToolbarItem = (activeStep, onNext) => {
     const activeStepId = activeStep.id;
-    const buttonId = activeStepId === 5 ? 'create-cache' : 'next-step';
+    const buttonId = activeStepId === 6 ? 'create-cache' : 'next-step';
     return (
       <ToolbarItem>
         <Button
@@ -175,7 +204,7 @@ const CreateWizard = () => {
           isDisabled={isButtonNextDisabled(activeStep.id)}
           data-cy="wizardNextButton"
         >
-          {activeStepId === 5 ? 'Create' : 'Next'}
+          {activeStepId === 6 ? 'Create' : 'Next'}
         </Button>
       </ToolbarItem>
     );
@@ -227,7 +256,11 @@ const CreateWizard = () => {
   const onSave = () => {
     const config = load(createConfigFromData(configuration));
     const model =
-      configuration.dataCaptureMethod.cacheType === 'lazy' ? GingersnapLazyCacheRule : GingersnapEagerCacheRule;
+      configuration.dataCaptureMethod.cacheType === CRType.Cache
+        ? GingersnapCache
+        : configuration.dataCaptureMethod.cacheType === CRType.Lazy
+        ? GingersnapLazyCacheRule
+        : GingersnapEagerCacheRule;
     createK8SResource(config, model);
   };
 

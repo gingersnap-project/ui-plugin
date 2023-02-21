@@ -13,14 +13,28 @@ import {
   TextInput
 } from '@patternfly/react-core';
 import { useCreateWizard } from '../../services/createWizardHook';
+import { CRType } from '../../utils/gingersnapRefData';
 
 const CacheType = () => {
   const { configuration, setConfiguration } = useCreateWizard();
 
   const [cacheType, setCacheType] = useState(configuration.dataCaptureMethod.cacheType);
   const [crName, setCRName] = useState(configuration.dataCaptureMethod.crName);
+  const [nameTitle, setNameTitle] = useState('');
+  const [isOpenCacheType, setIsOpenCacheType] = useState(false);
 
   useEffect(() => {
+    const name =
+      cacheType === CRType.Cache
+        ? 'Cache name'
+        : cacheType === CRType.Eager
+        ? 'Eager cache rule name'
+        : cacheType === CRType.Lazy
+        ? 'Lazy cache rule name'
+        : '';
+
+    setNameTitle(name);
+
     setConfiguration((prevState) => {
       return {
         ...prevState,
@@ -33,37 +47,36 @@ const CacheType = () => {
     });
   }, [cacheType, crName]);
 
+  const onSelectCacheType = (event, selection, placeholder) => {
+    setCacheType(selection);
+    setIsOpenCacheType(false);
+  };
+
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <FormSection title="Type of data capture" titleElement="h3">
         <FormGroup fieldId="cache-type" isInline isRequired>
-          <Radio
-            name="cache-type-radio"
-            id="lazy"
-            onChange={() => {
-              setCacheType('lazy');
-            }}
-            isChecked={cacheType === 'lazy'}
-            label="Lazy"
-            description={'Description'}
-          />
-          <Radio
-            name="cache-type-radio"
-            id="eager"
-            onChange={() => {
-              setCacheType('eager');
-            }}
-            isChecked={cacheType === 'eager'}
-            label="Eager"
-            description={'Description'}
-          />
+          <Select
+            placeholderText="Select type of cache to create"
+            variant={SelectVariant.single}
+            onToggle={() => setIsOpenCacheType(!isOpenCacheType)}
+            onSelect={onSelectCacheType}
+            selections={cacheType}
+            isOpen={isOpenCacheType}
+          >
+            <SelectOption key={0} value={CRType.Cache}></SelectOption>
+            <SelectOption key={1} value={CRType.Lazy}></SelectOption>
+            <SelectOption key={2} value={CRType.Eager}></SelectOption>
+          </Select>
         </FormGroup>
       </FormSection>
-      <FormSection title="CR info">
-        <FormGroup fieldId="cr-name" label={'CR Name'} isInline isRequired>
-          <TextInput value={crName} onChange={setCRName} type="text" />
-        </FormGroup>
-      </FormSection>
+      {cacheType !== '' && (
+        <FormSection title={nameTitle}>
+          <FormGroup fieldId="name" label={nameTitle} isInline isRequired>
+            <TextInput value={crName} onChange={setCRName} type="text" />
+          </FormGroup>
+        </FormSection>
+      )}
     </Form>
   );
 };
