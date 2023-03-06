@@ -1,61 +1,86 @@
 import { CRType } from '../utils/gingersnapRefData';
 
 export const createConfigFromData = (data: WizardConfiguration) => {
-  const kind =
-    data.dataCaptureMethod.cacheType === CRType.Cache ? 'Cache' : CRType.Eager ? 'EagerCacheRule' : 'LazyCacheRule';
-
-  const config = {
-    apiVersion: 'gingersnap-project.io/v1alpha1',
-    kind: kind,
-    metadata: {
-      name: data.dataCaptureMethod.crName,
-      namespace: 'openshift-operators'
-    },
-    spec: {}
+  const config = (kind: string, name: string) => {
+    return {
+      apiVersion: 'gingersnap-project.io/v1alpha1',
+      kind: kind,
+      metadata: {
+        name: name,
+        namespace: 'openshift-operators'
+      },
+      spec: {}
+    };
   };
 
-  const cache = {
+  const cacheDetails = {
     dataSource: {
-      dbType: data.cacheCRInfo.dbType,
+      dbType: data.cacheDetails.dbType,
       secretRef: {
-        name: data.cacheCRInfo.secretRef
+        name: data.cacheDetails.secretRef
       }
     }
   };
 
-  const lazyCache = {
-    cacheRef: {
-      name: data.cacheDetails.cacheName,
-      namespace: 'openshift-operators'
-    },
-    key: {
-      format: data.lazyKeyFormat.keyFormat,
-      keySeparator: data.lazyKeyFormat.keySeperator
-    },
-    query: data.lazyKeyFormat.queryString
+  const lazyCacheConfig = (format: string, keySeperator: string, query: string) => {
+    return {
+      cacheRef: {
+        name: data.cacheDetails.cacheName,
+        namespace: 'openshift-operators'
+      },
+      key: {
+        format: format,
+        keySeparator: keySeperator
+      },
+      query: query
+    };
   };
 
-  const eagerCache = {
-    cacheRef: {
-      name: data.cacheDetails.cacheName,
-      namespace: 'openshift-operators'
-    },
-    key: {
-      format: data.eagerKeyFormat.keyFormat,
-      keySeperator: data.eagerKeyFormat.keySeperator,
-      keyColumns: data.eagerKeyFormat.keys
-    },
-    value: {
-      valueColumns: data.eagerKeyFormat.values
-    },
-    tableName: data.eagerKeyFormat.table
+  const eagerCacheConfig = (format: string, keySeperator: string, keys: string[], values: string[], table: string) => {
+    return {
+      cacheRef: {
+        name: data.cacheDetails.cacheName,
+        namespace: 'openshift-operators'
+      },
+      key: {
+        format: format,
+
+        keySeparator: keySeperator,
+        keyColumns: keys
+      },
+      value: {
+        valueColumns: values
+      },
+      tableName: table
+    };
   };
 
-  data.dataCaptureMethod.cacheType === CRType.Lazy
-    ? (config['spec'] = Object.assign(config['spec'], lazyCache))
-    : data.dataCaptureMethod.cacheType === CRType.Eager
-    ? (config['spec'] = Object.assign(config['spec'], eagerCache))
-    : (config['spec'] = Object.assign(config['spec'], cache));
+  const cache = config('Cache', data.cacheDetails.cacheName);
+  cache['spec'] = Object.assign(cache['spec'], cacheDetails);
 
-  return JSON.stringify(config, null, 2);
+  const eagerCacheRules = data.cacheRules.eagerCacheRules.map((rule) => {
+    const eagerCache = config('EagerCacheRule', rule.name);
+    eagerCache['spec'] = Object.assign(
+      eagerCache['spec'],
+      eagerCacheConfig(rule.keyFormat, rule.keySeperator, rule.keys, rule.values, rule.table)
+    );
+    return JSON.stringify(eagerCache, null, 2);
+  });
+
+  const lazyCacheRules = data.cacheRules.lazyCacheRules.map((rule) => {
+    const lazyCache = config('LazyCacheRule', rule.name);
+    lazyCache['spec'] = Object.assign(
+      lazyCache['spec'],
+      lazyCacheConfig(rule.keyFormat, rule.keySeperator, rule.queryString)
+    );
+    return JSON.stringify(lazyCache, null, 2);
+  });
+
+  const result = {
+    cache: JSON.stringify(cache, null, 2),
+    eagerCacheRules: eagerCacheRules,
+    lazyCacheRules: lazyCacheRules
+  };
+
+  return result;
 };

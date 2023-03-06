@@ -16,19 +16,16 @@ import {
 } from '@patternfly/react-core';
 import { useStateCallback } from '../../services/stateCallbackHook';
 import { useCreateWizard } from '../../services/createWizardHook';
-import GettingStarted from './GettingStarted';
-import CacheType from './CacheType';
-import LazyKeyFormat from './LazyKeyFormat';
-import CacheDetails from './CacheDetails';
-import EagerKeyFormat from './EagerKeyFormat';
-import Review from './Review';
-import CacheCRInfo from './CacheCRInfo';
 import { createConfigFromData } from '../../utils/crConfig';
 import { k8sCreate } from '@openshift-console/dynamic-plugin-sdk';
 import { useHistory } from 'react-router-dom';
 import { load } from 'js-yaml';
 import { GingersnapCache, GingersnapEagerCacheRule, GingersnapLazyCacheRule } from '../../utils/models';
 import { CRType } from '../../utils/gingersnapRefData';
+import GettingStarted from './GettingStarted';
+import CacheBasicInfo from './CacheBasicInfo';
+import CacheRules from './CacheRules';
+import Review from './Review';
 
 const CreateWizard = () => {
   const { configuration } = useCreateWizard();
@@ -42,24 +39,6 @@ const CreateWizard = () => {
     showEagerCache: false
   });
 
-  const canJumpToCacheDetails = (): boolean => {
-    return configuration.dataCaptureMethod.cacheType === CRType.Lazy
-      ? configuration.lazyKeyFormat.valid
-      : configuration.dataCaptureMethod.cacheType === CRType.Eager
-      ? configuration.eagerKeyFormat.valid
-      : false;
-  };
-
-  const keyFormatComponent = () => {
-    return configuration.dataCaptureMethod.cacheType === CRType.Lazy ? (
-      <LazyKeyFormat />
-    ) : configuration.dataCaptureMethod.cacheType === CRType.Eager ? (
-      <EagerKeyFormat />
-    ) : (
-      <></>
-    );
-  };
-
   // Steps
   const stepGettingStarted = {
     id: 1,
@@ -70,36 +49,21 @@ const CreateWizard = () => {
     hideBackButton: true
   };
 
-  const stepDataCapture = {
-    id: 2,
-    name: 'Data capture',
-    component: <CacheType />,
-    enableNext: configuration.dataCaptureMethod.valid
-  };
-
-  const stepCacheCR = {
-    id: 3,
-    name: 'Info',
-    component: <CacheCRInfo />,
-    canJumpTo: configuration.dataCaptureMethod.valid
-  };
-
-  const stepKeyFormat = {
-    id: 4,
-    name: 'Key format',
-    component: keyFormatComponent(),
-    canJumpTo: configuration.dataCaptureMethod.valid
-  };
-
   const stepCacheDetails = {
-    id: 5,
+    id: 2,
     name: 'Cache details',
-    component: <CacheDetails />,
-    canJumpTo: canJumpToCacheDetails()
+    component: <CacheBasicInfo />,
+    enableNext: configuration.cacheDetails.valid
+  };
+
+  const stepCacheRules = {
+    id: 3,
+    name: 'Cache rules',
+    component: <CacheRules />
   };
 
   const stepReview = {
-    id: 6,
+    id: 4,
     name: 'Review',
     component: <Review />,
     canJumpTo: false
@@ -107,19 +71,14 @@ const CreateWizard = () => {
 
   const steps = [
     stepGettingStarted,
-    ...(configuration.start.valid ? [stepDataCapture] : []),
-    ...(configuration.dataCaptureMethod.cacheType === CRType.Cache ? [stepCacheCR] : []),
-    ...(configuration.dataCaptureMethod.cacheType === CRType.Lazy ||
-    configuration.dataCaptureMethod.cacheType === CRType.Eager
-      ? [stepKeyFormat, stepCacheDetails]
-      : []),
+    ...(configuration.start.valid ? [stepCacheDetails, stepCacheRules] : []),
     stepReview
   ];
 
   const getNextStep = (event, activeStep, callback) => {
     event.stopPropagation();
     if (activeStep.id === 2) {
-      if (configuration.dataCaptureMethod.cacheType === CRType.Lazy) {
+      if (configuration.cacheRules.ruleType === CRType.Lazy) {
         setStateObj(
           {
             showLazyCache: true,
@@ -127,7 +86,7 @@ const CreateWizard = () => {
           },
           () => callback()
         );
-      } else if (configuration.dataCaptureMethod.cacheType === CRType.Eager) {
+      } else if (configuration.cacheRules.ruleType === CRType.Eager) {
         setStateObj(
           {
             showLazyCache: false,
@@ -145,7 +104,7 @@ const CreateWizard = () => {
 
   const getPreviousStep = (event, activeStep, callback) => {
     event.stopPropagation();
-    if (configuration.dataCaptureMethod.cacheType === CRType.Lazy) {
+    if (configuration.cacheRules.ruleType === CRType.Lazy) {
       setStateObj(
         {
           ...stateObj,
@@ -153,7 +112,7 @@ const CreateWizard = () => {
         },
         () => callback()
       );
-    } else if (configuration.dataCaptureMethod.cacheType === CRType.Eager) {
+    } else if (configuration.cacheRules.ruleType === CRType.Eager) {
       setStateObj(
         {
           ...stateObj,
@@ -173,15 +132,6 @@ const CreateWizard = () => {
         activeButton = configuration.start.valid;
         break;
       case 2:
-        activeButton = configuration.dataCaptureMethod.valid;
-        break;
-      case 3:
-        activeButton = configuration.cacheCRInfo.valid;
-        break;
-      case 4:
-        activeButton = canJumpToCacheDetails();
-        break;
-      case 5:
         activeButton = configuration.cacheDetails.valid;
         break;
       default:
@@ -192,7 +142,7 @@ const CreateWizard = () => {
 
   const nextOrCreateToolbarItem = (activeStep, onNext) => {
     const activeStepId = activeStep.id;
-    const buttonId = activeStepId === 6 ? 'create-cache' : 'next-step';
+    const buttonId = activeStepId === 4 ? 'create-cache' : 'next-step';
     return (
       <ToolbarItem>
         <Button
@@ -204,7 +154,7 @@ const CreateWizard = () => {
           isDisabled={isButtonNextDisabled(activeStep.id)}
           data-cy="wizardNextButton"
         >
-          {activeStepId === 6 ? 'Create' : 'Next'}
+          {activeStepId === 4 ? 'Create' : 'Next'}
         </Button>
       </ToolbarItem>
     );
@@ -241,27 +191,31 @@ const CreateWizard = () => {
   const createK8SResource = (content, model) => {
     k8sCreate({ model: model, data: content })
       .then((e) => {
-        setNotification({
-          title: `${e.metadata.name} is created`,
-          variant: AlertVariant.success
-        });
         history.push(`resources`);
+        const actionResponse = {
+          message: 'Cache created successfully',
+          success: true,
+          data: e.metadata.name
+        };
+        return actionResponse;
+      })
+      .then((actionResponse) => {
+        console.log('actionResponse', actionResponse);
       })
       .catch((e) => {
-        setNotification({ title: e.message, variant: AlertVariant.danger });
         console.error(e);
       });
   };
 
   const onSave = () => {
-    const config = load(createConfigFromData(configuration));
-    const model =
-      configuration.dataCaptureMethod.cacheType === CRType.Cache
-        ? GingersnapCache
-        : configuration.dataCaptureMethod.cacheType === CRType.Lazy
-        ? GingersnapLazyCacheRule
-        : GingersnapEagerCacheRule;
-    createK8SResource(config, model);
+    const config = createConfigFromData(configuration);
+    const cacheConfig = load(config.cache);
+    const eagerConfigs = config.eagerCacheRules.map((e) => load(e));
+    const lazyConfigs = config.lazyCacheRules.map((e) => load(e));
+
+    createK8SResource(cacheConfig, GingersnapCache);
+    eagerConfigs.forEach((e) => createK8SResource(e, GingersnapEagerCacheRule));
+    lazyConfigs.forEach((e) => createK8SResource(e, GingersnapLazyCacheRule));
   };
 
   const closeWizard = () => {
@@ -288,19 +242,14 @@ const CreateWizard = () => {
     </WizardFooter>
   );
   return (
-    <>
-      {notification.title !== '' && (
-        <Alert title={notification.title} variant={notification.variant} isInline actionClose />
-      )}
-      <Wizard
-        navAriaLabel={`steps`}
-        mainAriaLabel={`content`}
-        onClose={closeWizard}
-        onSave={onSave}
-        steps={steps}
-        footer={CustomFooter}
-      />
-    </>
+    <Wizard
+      navAriaLabel={`steps`}
+      mainAriaLabel={`content`}
+      onClose={closeWizard}
+      onSave={onSave}
+      steps={steps}
+      footer={CustomFooter}
+    />
   );
 };
 
