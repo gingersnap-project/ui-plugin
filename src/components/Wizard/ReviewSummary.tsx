@@ -24,7 +24,7 @@ const ReviewSummary = () => {
         </StackItem>
         <StackItem>
           <TextContent>
-            <Text component="h2">{configuration.dataCaptureMethod.crName}</Text>
+            <Text component="h2">{configuration.cacheDetails.cacheName}</Text>
           </TextContent>
         </StackItem>
       </Stack>
@@ -51,10 +51,10 @@ const ReviewSummary = () => {
           <DescriptionListTerm>Namespace</DescriptionListTerm>
           <DescriptionListDescription>{'openshift-operators'}</DescriptionListDescription>
         </DescriptionListGroup>
-        <DescriptionListGroup>
+        {/* <DescriptionListGroup>
           <DescriptionListTerm>Deployment type</DescriptionListTerm>
           <DescriptionListDescription>{configuration.cacheDetails.deploymentType || '-'}</DescriptionListDescription>
-        </DescriptionListGroup>
+        </DescriptionListGroup> */}
         <DescriptionListGroup>
           <DescriptionListTerm>DB vendor</DescriptionListTerm>
           <DescriptionListDescription>{'MySQl'}</DescriptionListDescription>

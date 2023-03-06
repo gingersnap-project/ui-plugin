@@ -14,6 +14,7 @@ import {
 import { CubesIcon, SearchIcon } from '@patternfly/react-icons';
 import { GingersnapCache, GingersnapEagerCacheRule, GingersnapLazyCacheRule } from '../../../utils/models';
 import { useListResources } from '../../../services/resourcesHook';
+import { useActiveNamespace, useDashboardResources } from '@openshift-console/dynamic-plugin-sdk-internal';
 
 const columns = [
   {
@@ -38,7 +39,7 @@ const ViewResources = () => {
   const [caches, cacheLoadError, cacheLoading] = useListResources({ model: GingersnapCache });
   const [eagerCacheRule, eagerLoadError, eagerLoading] = useListResources({ model: GingersnapEagerCacheRule });
   const [lazyCacheRule, lazyLoadError, lazyLoading] = useListResources({ model: GingersnapLazyCacheRule });
-
+  const [activeNamespace] = useActiveNamespace();
   const [resources, setResources] = useState([]);
   const [data, filteredData, onFilterChange] = useListPageFilter(resources);
 

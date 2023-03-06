@@ -18,48 +18,44 @@ interface GettingStartedState {
   valid: boolean;
 }
 
-interface DataCaptureMethod {
-  cacheType: string;
-  crName: string;
-  valid: boolean;
-}
-
-interface LazyKeyFormat {
-  queryString: string;
+interface EagerCacheRule {
+  name: string;
+  table?: string;
+  keys?: string[];
+  values?: string[];
   keyFormat?: string;
   keySeperator?: string;
-  valid: boolean;
+}
+
+interface LazyCacheRule {
+  name: string;
+  queryString?: string;
+  keyFormat?: string;
+  keySeperator?: string;
 }
 
 interface CacheDetails {
   cacheName: string;
+  dbType: string;
+  secretRef: string;
   dataSetSize?: number;
   diskTradeoff?: number;
   deploymentType?: string;
   valid: boolean;
 }
 
-interface EagerKeyFormat {
-  table: string;
-  fields?: string;
-  keys: string[];
-  values?: string[];
-  keyFormat?: string;
-  keySeperator?: string;
-  valid: boolean;
-}
-
-interface CacheCRInfo {
-  dbType: string;
-  secretRef: string;
+interface CacheRules {
+  ruleType?: string;
+  ruleName?: string;
+  eagerCacheRules?: EagerCacheRule[];
+  lazyCacheRules?: LazyCacheRule[];
+  eagerRule?: EagerCacheRule;
+  lazyRule?: LazyCacheRule;
   valid: boolean;
 }
 
 interface WizardConfiguration {
   start: GettingStartedState;
-  dataCaptureMethod: DataCaptureMethod;
-  cacheCRInfo?: CacheCRInfo;
-  lazyKeyFormat?: LazyKeyFormat;
-  eagerKeyFormat?: EagerKeyFormat;
   cacheDetails?: CacheDetails;
+  cacheRules?: CacheRules;
 }

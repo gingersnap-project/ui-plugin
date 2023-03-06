@@ -4,9 +4,6 @@ import {
   Form,
   FormGroup,
   FormSection,
-  Page,
-  PageSection,
-  Radio,
   Select,
   SelectVariant,
   SelectOption,
@@ -14,15 +11,19 @@ import {
   TextInput
 } from '@patternfly/react-core';
 import { useCreateWizard } from '../../services/createWizardHook';
+import { DBType } from '../../utils/gingersnapRefData';
 
-const CacheDetails = () => {
+const CacheBasicInfo = () => {
   const { configuration, setConfiguration } = useCreateWizard();
 
   const [cacheName, setCacheName] = useState(configuration.cacheDetails.cacheName);
+  const [dbType, setDBType] = useState(configuration.cacheDetails.dbType);
+  const [secretRef, setSecretRef] = useState(configuration.cacheDetails.secretRef);
   const [dataSetSize, setDataSetSize] = useState(configuration.cacheDetails.dataSetSize);
   const [diskTradeoff, setDiskTradeoff] = useState(configuration.cacheDetails.diskTradeoff);
   const [deploymentType, setDeploymentType] = useState(configuration.cacheDetails.deploymentType);
 
+  const [isOpenDBType, setIsOpenDBType] = useState(false);
   const [isOpenDeploymentType, setIsOpenDeploymentType] = useState(false);
 
   useEffect(() => {
@@ -30,27 +31,72 @@ const CacheDetails = () => {
       return {
         ...prevState,
         cacheDetails: {
+          ...prevState.cacheDetails,
           cacheName: cacheName,
+          dbType: dbType,
+          secretRef: secretRef,
           dataSetSize: dataSetSize,
           diskTradeoff: diskTradeoff,
           deploymentType: deploymentType,
-          valid: cacheName.length > 0
+          valid: validate()
         }
       };
     });
-  }, [cacheName, dataSetSize, diskTradeoff, deploymentType]);
+  }, [cacheName, dbType, secretRef, dataSetSize, diskTradeoff, deploymentType]);
+
+  const validate = () => {
+    let valid = true;
+    valid = valid && cacheName.length > 0;
+    valid = valid && dbType.length > 0;
+    valid = valid && secretRef.length > 0;
+
+    return valid;
+  };
 
   const onSelectDeploymentType = (event, selection, placeholder) => {
     setDeploymentType(selection);
     setIsOpenDeploymentType(false);
   };
 
-  return (
-    <Form onSubmit={(e) => e.preventDefault()}>
-      <FormSection title="Cache details" titleElement="h3">
-        <FormGroup isRequired label={'Cache name'} fieldId="cache-name" isInline>
-          <TextInput type="text" value={cacheName} onChange={setCacheName} />
+  const dbTypeOptions = () => {
+    return Object.keys(DBType).map((key) => {
+      return <SelectOption key={key} value={DBType[key]} />;
+    });
+  };
+
+  const onSelectDBType = (event, selection, placeholder) => {
+    setDBType(selection);
+    setIsOpenDBType(false);
+  };
+
+  const formCacheDetails = () => {
+    return (
+      <FormSection title={'Cache Details'} titleElement="h3">
+        <FormGroup fieldId="cache-name" label={'Cache name'} isInline isRequired>
+          <TextInput value={cacheName} onChange={setCacheName} type="text" />
         </FormGroup>
+        <FormGroup isRequired fieldId="dbType" label="DB Type">
+          <Select
+            placeholderText="Select DB Type"
+            variant={SelectVariant.single}
+            onToggle={setIsOpenDBType}
+            onSelect={onSelectDBType}
+            selections={dbType}
+            isOpen={isOpenDBType}
+          >
+            {dbTypeOptions()}
+          </Select>
+        </FormGroup>
+        <FormGroup isRequired fieldId="secretRef" label="Secret Ref name">
+          <TextInput value={secretRef} onChange={setSecretRef} type="text" id="secretRef" />
+        </FormGroup>
+      </FormSection>
+    );
+  };
+
+  const formDeploymentSettings = () => {
+    return (
+      <FormSection title={'Deployment Settings'} titleElement="h3">
         <FormGroup label={'Estimated data set size'} fieldId="data-set-size" isInline>
           <TextInput type="text" value={dataSetSize} onChange={(e) => setDataSetSize(parseInt(e))} />
         </FormGroup>
@@ -72,8 +118,15 @@ const CacheDetails = () => {
           </Select>
         </FormGroup>
       </FormSection>
+    );
+  };
+
+  return (
+    <Form onSubmit={(e) => e.preventDefault()}>
+      {formCacheDetails()}
+      {formDeploymentSettings()}
     </Form>
   );
 };
 
-export default CacheDetails;
+export default CacheBasicInfo;
